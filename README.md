@@ -15,6 +15,7 @@ This software uses an Adafruit MagTag to have a low power display showing workou
 
 
 ## To use the software:
-1. Copy the **contents** of the */CIRCUITPY* folder into your Adafruit MagTag using Circuitpython version 7.3.0 (has not been tested with other versions)
-2. Add your SSID and Password to *secrets.py*
-3. Power on device and enjoy!
+1. Flash Circuitpython version 7.3.0 onto MagTag (has not been tested with other versions let me know if it works/breaks with higher versions) 
+2. Copy the **entirety** of the */CIRCUITPY* folder into your Adafruit MagTag
+3. Add your WiFi SSID and Password to *secrets.py*
+4. Power on device and enjoy!
