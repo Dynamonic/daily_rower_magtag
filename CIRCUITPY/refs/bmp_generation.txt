@@ -1,0 +1,81 @@
+from PIL import Image
+
+def makeMainScreen():
+    img = Image.new('RGB', (296,128), "black")
+    pixels = img.load()
+
+    black = (0,0,0)
+    white = (256,256,256)
+    #DRAW UPPER LINE
+    j = 128//5
+    #Draw Lower line
+    j2 = 128-(j-5)
+
+    #workout lines
+    space = j2-(j+1)
+    upper = space//3 + (j+1)
+    lower = j2-(upper-(j+1))
+
+    for i in range(296):
+        #title line
+        pixels[i,j] = white
+        pixels[i,j+1] = white
+        #workout areas
+        pixels[i,upper] = white
+        pixels[i,lower] = white
+        #button split
+        pixels[i,j2] = white
+
+    #OLD VERSION 
+    #vertical lines
+    #x = 296//3
+    #x2 = 296-x
+    #for k in range(j+1,j2):
+    #    pixels[x,k] = white
+    #    pixels[x2,k] = white
+    
+    #Button Divisions
+    m = 296//4
+    m2 = 296//2
+    m3 = 296-m
+    for l in range(j2,128):
+        pixels[m,l] = white
+        pixels[m2,l] = white
+        pixels[m3,l] = white
+    return img
+
+def makeIndividualWorkout():
+    img = Image.new('RGB', (296,128), "black")
+    pixels = img.load()
+
+    black = (0,0,0)
+    white = (256,256,256)
+    #DRAW UPPER LINE
+    j = 128//5
+    #Draw Lower line
+    j2 = 128-(j-5)
+    for i in range(296):
+        pixels[i,j] = white
+        pixels[i,j+1] = white
+        pixels[i,j2-j] = white
+        pixels[i,j2] = white
+    
+
+    #Button Divisions
+    m = 296//4
+    m2 = 296//2
+    m3 = 296-m
+    for l in range(j2,128):
+        pixels[m,l] = white
+        pixels[m2,l] = white
+        pixels[m3,l] = white
+    return img
+
+
+#UNCOMMENT WHICHEVER ONE YOU WANT TO MAKE
+#img = makeMainScreen()
+img = makeIndividualWorkout()
+#img.show()
+img.save('img.png',"")
+#note: you need to use a bitmap converter to use them as background screens
+    

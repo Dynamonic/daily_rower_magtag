@@ -1,0 +1,71 @@
+
+
+    
+def duplicate_pattern(listchar, pattern_size):
+    i = 0
+    while i+pattern_size <= len(listchar):
+        count = 1
+        j = i+pattern_size
+        while j < len(listchar):
+            if listchar[i:i+pattern_size] == listchar[j:j+pattern_size]:
+                count += 1
+                j += pattern_size
+            else:
+                break
+        if count > 1:
+            listchar[i] = str(count)+''.join(listchar[i:i+pattern_size])
+            for k in range((count*pattern_size)-1):
+                listchar.pop(i+1)
+        i += 1
+    return listchar
+
+def condense_singles(list_of_char):
+    i = 0
+    while i < len(list_of_char):
+        j = i+1
+        count = 1
+        while j < len(list_of_char):
+            if list_of_char[i] == list_of_char[j]:
+                count += 1
+                j += 1
+            else:
+                break
+        if count > 1:
+            list_of_char[i] = str(count)+list_of_char[i]
+            for k in range(count-1):
+                list_of_char.pop(i+1)
+        i += 1
+    return list_of_char
+
+
+def wod_condense(stringy):
+    wod_buttons = stringy.split('-')
+    wod_buttons = condense_singles(wod_buttons)
+    wod_buttons = duplicate_pattern(wod_buttons, 2)
+    wod_string = "-".join(wod_buttons)
+    return wod_string
+
+
+if __name__=="__main__":
+    teststr1 = "B-D-D-D-D-A-B-B-B-B-A-A-A-A-B-B-E-D-E-D-E-D-E-D-A-A-A-A-B-B-A-C-C-E-D-A-A-A-A-A-B-B-D-C-C-E-D-E-D-E-D-E-E"
+    teststr2 = "B-A-C"
+    test_strs = [teststr1, teststr2]
+
+    str1ans = "B-4D-A-4B-4A-2B-4ED-4A-2B-A-2C-E-D-5A-2B-D-2C-3ED-2E"
+    str2ans = "B-A-C"
+    str_ans = [str1ans, str2ans]
+
+    str1 = "A-B-B-B-B-C-C-C-C-D-E-D-E-D-E-A-E"
+    str2 = "B-D-D-B-D-B-A-B-B-B-B-A-A-A-A-B-B-B-E"
+    loc = ['A', 'B', 'B', 'B', 'B', 'C', 'C', 'E']
+    test_flag = True
+    for i in range(len(test_strs)):
+        if wod_condense(test_strs[i]) != str_ans[i]:
+            test_flag = False
+            print("Test case {0} failed".format(i))
+    if test_flag:
+        print("All tests passed")
+    print(condense_singles(loc))
+    print(wod_condense(str1))
+    print(wod_condense(str2))
+    print("A".split())

@@ -1,0 +1,171 @@
+import requests
+from bs4 import BeautifulSoup
+
+
+
+class Scraper:
+    endings = {'short':'/short/rower', 'medium':'/medium/rower', 'long':'/long/rower'}
+    htmls = "https://www.concept2.com/indoor-rowers/training/wod/workout/nojs/today"
+    alt_htmls = "https://www.concept2.com/indoor-rowers/training/wod/workout/nojs/random"
+    
+    def __init__(self):
+        self.workouts = {'short': {'title': "TITLE", 'body': "BODY", 'pm5 buttons': "BUTTON SEQUENCE"}, 
+                        'alt_short': {'title': "TITLE", 'body': "BODY", 'pm5 buttons': "BUTTON SEQUENCE"},
+                        'medium': {'title': "TITLE", 'body': "BODY", 'pm5 buttons': "BUTTON SEQUENCE"},
+                        'alt_medium': {'title': "TITLE", 'body': "BODY", 'pm5 buttons': "BUTTON SEQUENCE"},
+                        'long': {'title': "TITLE", 'body': "BODY", 'pm5 buttons': "BUTTON SEQUENCE"},
+                        'alt_long': {'title': "TITLE", 'body': "BODY", 'pm5 buttons': "BUTTON SEQUENCE"}}
+
+    def get_workouts(self):
+        return self.workouts
+
+    def get_workout(self, key):
+        if key in self.workouts.keys():
+            return (key, self.workouts[key])
+        else: 
+            return None
+
+    def get_alts(self):
+        alts = {}
+        for key in self.endings.keys():
+            alts["alt_"+key] = self.workouts["alt_"+key]
+        return alts
+
+    def scrape(self):
+        workouts = {}
+        for key, url in self.endings.items(): #make this get dict titles and urls.
+            response = requests.get(self.htmls+url)
+            alt_resp = requests.get(self.alt_htmls+url)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            alt_soup = BeautifulSoup(alt_resp.text, 'html.parser')
+            #PARSE SOUP AND MAKE DICT OF WORKOUT
+            workout = soup.find(id="wod-"+key) #+ 'short', 'medium', or 'long'
+            wo_dict = {}
+            wo_dict['title'] = workout.find('h4').text.strip()
+            wo_p = workout.find_all('p')
+            wo_dict['body'] = wo_p.pop(0).text.strip()
+            for item in wo_p:
+                if "PM5" in item.text.strip():
+                    wo_dict['pm5 buttons'] = self._wod_condense(item.text.strip().split("PM5: ")[1])
+            workouts[key] = wo_dict
+            #DO SAME WITH Alternate Workouts
+            alt_work = alt_soup.find(id="wod-"+key)
+            awo_dict = {}
+            awo_dict['title'] = alt_work.find('h4').text.strip()
+            awo_p = alt_work.find_all('p')
+            awo_dict['body'] = awo_p.pop(0).text.strip()
+            for item in awo_p:
+                if "PM5" in item.text.strip():
+                    awo_dict['pm5 buttons'] = self._wod_condense(item.text.strip().split("PM5: ")[1])
+            workouts['alt_'+key] = awo_dict
+        self.workouts = workouts
+        return workouts
+
+    def new_by_string(self, string_key):
+        alt_flag = False
+        wo_dict = {}
+        if string_key in self.workouts.keys():
+            for key, url in self.endings.items():
+                if key in string_key:       
+                    if "alt" in string_key:
+                        alt_flag = True
+                        response = requests.get(self.alt_htmls+url)
+                    else:
+                        response = requests.get(self.htmls+url)
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                    workout = soup.find(id="wod-"+key) #+ 'short', 'medium', or 'long'
+                    wo_dict['title'] = workout.find('h4').text.strip()
+                    wo_p = workout.find_all('p')
+                    wo_dict['body'] = wo_p.pop(0).text.strip()
+                    for item in wo_p:
+                        if "PM5" in item.text.strip():
+                            wo_dict['pm5 buttons'] = self._wod_condense(item.text.strip().split("PM5: ")[1])
+            return wo_dict
+        else:
+            return None
+
+    def new_alts(self):
+        workouts = {}
+        for key, url in self.endings.items():
+            alt_resp = requests.get(self.alt_htmls+url)
+            alt_soup = BeautifulSoup(alt_resp.text, 'html.parser')
+            alt_work = alt_soup.find(id="wod-"+key)
+            awo_dict = {}
+            awo_dict['title'] = alt_work.find('h4').text.strip()
+            awo_p = alt_work.find_all('p')
+            awo_dict['body'] = awo_p.pop(0).text.strip()
+            for item in awo_p:
+                if "PM5" in item.text.strip():
+                    awo_dict['pm5 buttons'] = self._wod_condense(item.text.strip().split("PM5: ")[1])
+            self.workouts['alt_'+key] = awo_dict
+            workouts['alt_'+key] = awo_dict
+        return workouts
+    
+
+    # FOLLOWING FUNCTIONS HELPERS FOR BUTTON CONDENSING
+    def _duplicate_pattern(self, listchar, pattern_size):
+        i = 0
+        while i+pattern_size <= len(listchar):
+            count = 1
+            j = i+pattern_size
+            while j < len(listchar):
+                if listchar[i:i+pattern_size] == listchar[j:j+pattern_size]:
+                    count += 1
+                    j += pattern_size
+                else:
+                    break
+            if count > 1:
+                listchar[i] = str(count)+''.join(listchar[i:i+pattern_size])
+                for k in range((count*pattern_size)-1):
+                    listchar.pop(i+1)
+            i += 1
+        return listchar
+
+    def _condense_singles(self, list_of_char):
+        i = 0
+        while i < len(list_of_char):
+            j = i+1
+            count = 1
+            while j < len(list_of_char):
+                if list_of_char[i] == list_of_char[j]:
+                    count += 1
+                    j += 1
+                else:
+                    break
+            if count > 1:
+                list_of_char[i] = str(count)+list_of_char[i]
+                for k in range(count-1):
+                    list_of_char.pop(i+1)
+            i += 1
+        return list_of_char
+
+    def _wod_condense(self, stringy):
+        wod_buttons = stringy.split('-')
+        wod_buttons = self._condense_singles(wod_buttons)
+        wod_buttons = self._duplicate_pattern(wod_buttons, 2)
+        wod_string = "-".join(wod_buttons)
+        return wod_string
+
+        
+
+#THIS IS THE FORMAT FOR WORKOUT OF DAY ON CONCEPT2 WEBSITE
+#<section id="wod-short">
+#<h3>Short</h3>
+#<h4>21 minutes with rate increase</h4>
+#<p class="light">
+#    Row a single 21 minute piece. Row the first six minutes @ 20 spm. Then row five minutes @ 22 spm, four @ 24, three @ 26, 
+#     28 and one @ 30.
+#     </p> 
+#<h4>Button Sequences</h4>
+#<p class="light">
+#<p><strong>PM3/PM4/PM5</strong>: B-D-B-C-A-B-E</p>
+#</p>
+#</section>
+
+if __name__=='__main__':
+    s = Scraper()
+    print(s.scrape())
+
+
+#REGEX
+#   <section id="wod-.*?<h4>([^<]+).*?<p class="light">([^<]+).*?<strong>PM5<\/strong>: ([^<]+)

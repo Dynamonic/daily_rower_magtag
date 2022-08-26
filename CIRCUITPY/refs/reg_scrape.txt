@@ -1,0 +1,29 @@
+import requests
+import re
+
+exp = r'<section id="wod-.*?<h4>([^<]+).*?<p class="light">([^<]+).*?<strong>.*?PM5.*?<\/strong>: ([^<]+)'
+alt_html = "https://www.concept2.com/indoor-rowers/training/wod/workout/nojs/random/short/rower"
+response = requests.get(alt_html)
+
+
+#print(response.text) #DEBUG
+prog = re.compile(exp, re.DOTALL)
+matches = prog.search(response.text)
+
+#Does same thing as dotall by removing (/r/n) newlines
+text = response.text.replace("\r", " ")
+filter_text = text.replace("\n", " ")
+match2 = re.search(exp, filter_text)
+
+
+if matches is not None:
+    print(matches.groups())
+else:
+    print("matches fail")
+if match2 is not None:
+    print(match2.groups())
+else:
+    print("match2 fail")
+
+#REGEX NOTE: / and /gs not used for python re module
+#   /<section id="wod-.*?<h4>([^<]+).*?<p class="light">([^<]+).*?<strong>.*?PM5.*?<\/strong>: ([^<]+)/gs
