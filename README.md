@@ -7,7 +7,7 @@ This software uses an Adafruit MagTag to have a low power display showing workou
 
 1x [Adafruit MagTag](https://www.adafruit.com/product/4800)
 
-1x [3.7V lipo battery](https://www.adafruit.com/product/4236)
+1x [3.7V lipo battery](https://www.adafruit.com/product/4236)* Note: Deep Sleep functionality breaks if connected to power over USB connector.
 
 **OPTIONAL:**
 
